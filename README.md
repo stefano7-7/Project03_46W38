@@ -71,14 +71,14 @@ project03_46W38/
 │   ├── raw/                # original dataset
 │   └── processed/          # cleaned data
 │
-├── src/
+├── scripts/
 │   ├── main.py             # main script/user interface
 │   ├── load_data.py        # reading datasets
-│   ├── preprocess.py       # prepre
+│   ├── preprocess.py       # clean input data
 │   ├── split_in_subsets.py # split in training and testing subsets
 │   ├── train.py            # training 
 │   ├── predict.py          # loading model and predicting
-│   ├── evaluate.py         # ccharts and metrics to evaluate the model
+│   ├── evaluate.py         # charts and metrics to evaluate the model
 │   ├── save_model.py       # save tested model
 │
 ├── models/                 # saved trained models (.pkl)
