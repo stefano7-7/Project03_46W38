@@ -1,13 +1,12 @@
 # Project03_46W38  
 Wind power forecasting by machine learning  
 
-## Dataset Description
+## Input data
+Dataset of **wind and power hourly data from 4 turbine sites** 
+Time period: 02.01.2017 → 31.12.2021,  
+Source: openly available dataset with open “CC0 1.0 Universal” license
 
-The project uses an hourly dataset of wind and power production from **4 turbine sites**, covering:  
-**02.01.2017 → 31.12.2021**,  
-with an **open “CC0 1.0 Universal” license**.
-
-### Available Variables
+### Available channels & format/unit
 - Time — `YYYY-MM-DD HH:mm:ss`
 - temperature_2m — °F @ 2 m
 - relativehumidity_2m — %
@@ -21,10 +20,9 @@ with an **open “CC0 1.0 Universal” license**.
 
 ---
 
-## ML Pipeline Overview
+## Sequence Overview
 
 Steps:
-
 1. **load_data**  
 2. **preprocess_data**  
 3. **train/test split — 80% train, 20% test**  
@@ -43,32 +41,24 @@ Steps:
 
 ---
 
-## Pipeline Diagram (Mermaid)
+## Flowchart (Mermaid)
 
 ```mermaid
-flowchart TB
-    subgraph INPUT["Dataset 2017–2021"]
-        A["Wind and Power Observations - Hourly - 4 sites"]
-    end
+flowchart 
+INPUT["Wind and Power Hourly Data"]
+LOAD_DATA["Load Data"]
+subgraph ML_BLOCK ["ML MODULE"]
+    D["Split in subsets 80%-20% training-test"]
+    E["Train Model"]
+    F["Test Model"]
+    D --> E --> F
+end
+subgraph EVALUATION["EVALUATION"]
+    G1["PLOTTING (Scatter Plot & Distrib of errors)"]
+    H1["METRICS"]
+end
+SAVE["Save model"] 
 
-    subgraph PIPELINE["ML Pipeline"]
-        B["Load Data"]
-        C["Preprocess Data - cleaning and feature engineering"]
-        D["Train Test Split 80-20"]
-        E["Train Model"]
-        F["Test Model"]
-    end
-
-    subgraph EVAL["Evaluation"]
-        G1["Scatter Plot: y_true vs y_pred"]
-        G2["Error Distribution"]
-        H1["MSE"]
-        H2["RMSE"]
-        H3["MAE"]
-        H4["R2"]
-    end
-
-    J["Save Model"]
-
-    A --> B --> C --> D --> E --> F --> EVAL --> J
+INPUT --> LOAD_DATA --> PREPROCESSING
+PREPROCESSING --> ML_BLOCK --> EVALUATION --> SAVE
 
