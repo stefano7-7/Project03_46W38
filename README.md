@@ -2,9 +2,9 @@
 Wind power forecasting by machine learning  
 
 ## Input data
-Dataset of **wind and power hourly data from 4 turbine sites**
-Time period: from 02.01.2017 to 31.12.2021
-Source: openly available dataset with open “CC0 1.0 Universal” license
+Dataset of **wind and power hourly data from 4 turbine sites**  
+Time period: from 02.01.2017 to 31.12.2021  
+Source: openly available dataset with open “CC0 1.0 Universal” license  
 
 #### Available channels & format/unit
 - Time — `YYYY-MM-DD HH:mm:ss`
