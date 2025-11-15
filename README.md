@@ -2,8 +2,8 @@
 Wind power forecasting by machine learning  
 
 ## Input data
-Dataset of **wind and power hourly data from 4 turbine sites** 
-Time period: 02.01.2017 → 31.12.2021,  
+Dataset of **wind and power hourly data from 4 turbine sites**
+Time period: from 02.01.2017 to 31.12.2021
 Source: openly available dataset with open “CC0 1.0 Universal” license
 
 ### Available channels & format/unit
@@ -30,11 +30,9 @@ Steps:
 5. **test_model**  
 6. **evaluation metrics**
    - **Plots**
-     - Scatter plot: `y_true vs y_pred`
-     - Error distribution
-   - **Numerical metrics (regression)**
-     - MSE — Mean Squared Error  
-     - RMSE — Root Mean Square Error  
+     - Scatter plot: `y_true vs. y_pred` & Error distribution
+   - **Numerical metrics**
+     - MSE,  RMSE — Root Mean Square Error  
      - MAE — Mean Absolute Error  
      - R² — coefficient of determination  
 7. **save_model**
@@ -61,4 +59,29 @@ SAVE["Save model"]
 
 INPUT --> LOAD_DATA --> PREPROCESSING
 PREPROCESSING --> ML_BLOCK --> EVALUATION --> SAVE
+```
+--- 
 
+## Folder structure
+
+```text
+project03_46W38/
+│
+├── data/
+│   ├── raw/                # original dataset
+│   └── processed/          # cleaned data
+│
+├── src/
+│   ├── main.py             # main script/user interface
+│   ├── load_data.py        # reading datasets
+│   ├── preprocess.py       # prepre
+│   ├── split_in_subsets.py # split in training and testing subsets
+│   ├── train.py            # training 
+│   ├── predict.py          # loading model and predicting
+│   ├── evaluate.py         # ccharts and metrics to evaluate the model
+│   ├── save_model.py       # save tested model
+│
+├── models/                 # saved trained models (.pkl)
+|
+└── README.md
+```
