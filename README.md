@@ -6,7 +6,7 @@ Dataset of **wind and power hourly data from 4 turbine sites**
 Time period: from 02.01.2017 to 31.12.2021
 Source: openly available dataset with open “CC0 1.0 Universal” license
 
-### Available channels & format/unit
+#### Available channels & format/unit
 - Time — `YYYY-MM-DD HH:mm:ss`
 - temperature_2m — °F @ 2 m
 - relativehumidity_2m — %
@@ -23,18 +23,16 @@ Source: openly available dataset with open “CC0 1.0 Universal” license
 ## Sequence Overview
 
 Steps:
-1. **load_data**  
-2. **preprocess_data**  
-3. **train/test split — 80% train, 20% test**  
-4. **train_model**  
-5. **test_model**  
+1. **input data**
+    - load_data
+    - preprocess_data  
+3. **machine learning module**
+    - split in subsets — 80% train, 20% test
+    - train model 
+    - test model
 6. **evaluation metrics**
-   - **Plots**
-     - Scatter plot: `y_true vs. y_pred` & Error distribution
-   - **Numerical metrics**
-     - MSE,  RMSE — Root Mean Square Error  
-     - MAE — Mean Absolute Error  
-     - R² — coefficient of determination  
+   - plots
+   - numerical metrics 
 7. **save_model**
 
 ---
