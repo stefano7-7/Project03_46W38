@@ -1,49 +1,59 @@
-# Project03_46W38
-wind power forecasting by machine learning
-|-- input: hourly record of wind and power production of 4 turbine sites from 02.01.017 to 31.12.2021, 
-|   |-- openly available dataset with "CC0 1.0 Universal" license
-|   |-- Time - hour of the day in format YYY-MM-dd HH:mm:ss
-|   |-- temperature_2m - °F @ 2m asl
-|   |-- relativehumidity_2m - % @ 2m asl
-|   |-- dewpoint_2m - °F @ 2 asl
-|   |-- windspeed_10m - m/s @ 10 m asl
-|   |-- windspeed_100m - m/s @ 100 m asl
-|   |-- winddirection_10m - Wind direction in degrees (0-360) at 10 m asl
-|   |-- winddirection_100m - deg (0-360) @ 100 m asl
-|   |-- windgusts_10m - m/s @ 10 m asl
-|   |-- power - % of Prated (normalized power)
-|
-|-- load_data
-|-- preprocess_data
-|-- divide_in__80-20_subsets
-|
-|-- train_model on training data subset
-|-- test_model on test data subset
-|-- metrics on results
-|   |-- plots 
-|   |   |-- scatter plot y_true vs y_pred
-|   |   |-- distribution of errors y_actual-ypredicted
-|   |   |-- confusion matrix (tbd how to plly it here)
-|   |-- numerical metrics
-|   |   |-- MSE – Mean Squared Error (penalizing larger deviations y_actual-ypredicted)
-|   |   |-- RMSE – Root Mean Squared Error (same unit of predicted, here % of Prated)
-|   |   |-- MAE – Mean Absolute Error
-|   |   |-- R² – how much the model captures
-|   |-- classification of the model
-|   |   |-- accuracy = % of correct predictions (in this case there is no inherent unbalance in data)
-|   |   |-- precision (tbd in this case)
-|   |   |-- recall / F1 (tbc if applicable here)
-|   |   |-- R² – how much the model captures
-|-- save model
+# Project03_46W38  
+Wind power forecasting by machine learning  
 
-flowchart project 3
+## Dataset Description
+
+The project uses an hourly dataset of wind and power production from **4 turbine sites**, covering:  
+**02.01.2017 → 31.12.2021**,  
+with an **open “CC0 1.0 Universal” license**.
+
+### Available Variables
+- Time — `YYYY-MM-DD HH:mm:ss`
+- temperature_2m — °F @ 2 m
+- relativehumidity_2m — %
+- dewpoint_2m — °F
+- windspeed_10m — m/s @ 10 m
+- windspeed_100m — m/s @ 100 m
+- winddirection_10m — deg (0–360) @ 10 m
+- winddirection_100m — deg (0–360) @ 100 m
+- windgusts_10m — m/s
+- power — % of Prated (normalized)
+
+---
+
+## ML Pipeline Overview
+
+Steps:
+
+1. **load_data**  
+2. **preprocess_data**  
+3. **train/test split — 80% train, 20% test**  
+4. **train_model**  
+5. **test_model**  
+6. **evaluation metrics**
+   - **Plots**
+     - Scatter plot: `y_true vs y_pred`
+     - Error distribution
+   - **Numerical metrics (regression)**
+     - MSE — Mean Squared Error  
+     - RMSE — Root Mean Square Error  
+     - MAE — Mean Absolute Error  
+     - R² — coefficient of determination  
+7. **save_model**
+
+---
+
+## Pipeline Diagram (Mermaid)
+
+```mermaid
+flowchart TB
     subgraph INPUT["Dataset 2017–2021"]
         A["Wind and Power Observations - Hourly - 4 sites"]
     end
 
     subgraph PIPELINE["ML Pipeline"]
         B["Load Data"]
-        C["Preprocess Data - cleaning, feature engineering"]
+        C["Preprocess Data - cleaning and feature engineering"]
         D["Train Test Split 80-20"]
         E["Train Model"]
         F["Test Model"]
@@ -61,3 +71,4 @@ flowchart project 3
     J["Save Model"]
 
     A --> B --> C --> D --> E --> F --> EVAL --> J
+
