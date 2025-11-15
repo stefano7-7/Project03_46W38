@@ -41,8 +41,11 @@ Steps:
 
 ```mermaid
 flowchart 
-INPUT["Wind and Power Hourly Data"]
-LOAD_DATA["Load Data"]
+subgraph INPUT ["DATA INPUT & CLEANING"]
+    LOAD_DATA["Load Wind and Power Hourly Data"]
+    PREPROCESS["data cleaning"]
+    LOAD_DATA --> PREPROCESS
+end
 subgraph ML_BLOCK ["ML MODULE"]
     D["Split in subsets 80%-20% training-test"]
     E["Train Model"]
