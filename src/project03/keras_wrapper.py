@@ -4,35 +4,44 @@ import numpy as np
 
 
 class KerasWrapper:
-    """
-    :var start_date: Description
-    :vartype start_date: first
-    :var end_date: Description
-    :vartype end_date: last
+    """"
+    Wrapper to make a Keras model behave like a scikit-learn estimator
     """
 
-    def __init__(self, build_fn):
+    def __init__(self, build_fn, epochs=200, batch_size=32):
+        """
+        build_fn : function that returns a compiled Keras model
+        epochs : int, nb of training epochs
+        batch_size : int, batch size during training
+        """
         self.build_fn = build_fn
         self.model = None
+        self.epochs = epochs
+        self.batch_size = batch_size
 
     def fit(self, x, y):
         """
-        :param self: Description
-        :param X: Description
-        :param y: Description
+        Fit the Keras model with numpy arrays x and y
         """
         x = np.array(x)
         y = np.array(y)
 
-        self.model = self.build_fn()
-        epochs = int(ask_value('Choose epochs', ['50', '200'], '200'))
-        self.model.fit(x, y, epochs=epochs, batch_size=32, verbose=0)
+        # build model only once
+        if self.model is None:
+            self.model = self.build_fn()
+
+        self.model.fit(
+            x, y,
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            verbose=0
+        )
         return self
 
     def predict(self, x):
         """
-        :param self: Description
-        :param x: Description
+        Predict using the trained Keras model
+        Returns a 1D numpy array (like sklearn)
         """
         x = np.array(x)
         return self.model.predict(x).ravel()

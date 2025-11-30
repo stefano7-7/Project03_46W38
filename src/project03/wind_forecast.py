@@ -115,9 +115,18 @@ class WindForecast():
     def split(self):
         """splitting the dataset 80-20 train-test"""
         # can be upgraded adding x = df['temperature_2m']
-        x = self.df[['windspeed_100m']]
-        x_time = self.df['Time']
-        y = self.df['Power']
+
+        df = self.df.copy()
+
+        # time t+1h
+        df['Power_future'] = df['Power'].shift(-1)
+        df['Time_future'] = df['Time'].shift(-1)
+        df = df.dropna(subset=['Power_future', 'Time_future'])
+
+        # time t
+        x = df[['windspeed_100m']]
+        x_time = df['Time_future']
+        y = df['Power_future']
 
         # scaler per X
         self.x_scaler = StandardScaler()
@@ -126,15 +135,19 @@ class WindForecast():
         split_index = int(0.8 * len(self.df))
 
         # x dataset has to be a 2D dataframe for ML models
-        # self.x_train, self.x_test = x.iloc[:split_index], x.iloc[split_index:]
-        self.x_train, self.x_test = x_scaled[:
-                                             split_index], x_scaled[split_index:]
+        self.x_train = x_scaled[:split_index]
+        self.x_test = x_scaled[split_index:]
         self.x_time_test = x_time.iloc[split_index:]
-        self.y_train, self.y_test = y.iloc[:split_index], y.iloc[split_index:]
+
+        self.y_train = y.iloc[:split_index]
+        self.y_test = y.iloc[split_index:]  # actual power at t+1h
+        self.y_current_test = df['Power'].iloc[split_index:]
 
         # check extremes of train & test datasets
-        print("TRAIN Power min/max:", self.y_train.min(), self.y_train.max())
-        print("TEST  Power min/max:", self.y_test.min(), self.y_test.max())
+        print("TRAIN Power_future min/max:",
+              self.y_train.min(), self.y_train.max())
+        print("TEST  Power_future min/max:",
+              self.y_test.min(), self.y_test.max())
 
         return self
 
@@ -156,24 +169,27 @@ class WindForecast():
 
         if model_name == 'NN':
             hidden_layer_sizes = int(ask_value('Choose nb neurons per layer',
-                                               ['100', '500'], '500'))
+                                               ['100', '500'], '100'))
             max_iter = int(
-                ask_value('Choose max iterations', ['500', '1000'], '1000'))
+                ask_value('Choose max iterations', ['500', '1000'], '500'))
             self.model = MLPRegressor(
                 hidden_layer_sizes=(hidden_layer_sizes, hidden_layer_sizes),
                 activation='relu', max_iter=max_iter)
 
         if model_name == "NN_Keras":
+            epochs = int(ask_value('Choose epochs', ['50', '200'], '50'))
+
             def build_model():
-                model = Sequential([Input(shape=(self.x_train.shape[1],)),
-                                    Dense(64, activation='relu'),
-                                    Dense(64, activation='relu'),
-                                    # forcing output in (0,1)
-                                    Dense(1, activation='sigmoid')
-                                    ])
+                model = Sequential([
+                    Input(shape=(self.x_train.shape[1],)),
+                    Dense(64, activation='relu'),
+                    Dense(64, activation='relu'),
+                    # forcing output in (0,1)
+                    Dense(1, activation='sigmoid')
+                ])
                 model.compile(optimizer='adam', loss='mse')
                 return model
-            self.model = KerasWrapper(build_model)
+            self.model = KerasWrapper(build_model, epochs=epochs, batch_size=3)
 
         # method returning trained model
         self.model.fit(self.x_train, self.y_train)
@@ -188,35 +204,38 @@ class WindForecast():
         """
 
         # apply ML model to test dataset
-        x_test_scaled = self.x_scaler.transform(self.x_test)
+        # x_test_scaled = self.x_scaler.transform(self.x_test)
+        x_test_scaled = self.x_test
         y_predicted = self.model.predict(x_test_scaled)
 
-        # persistence model 1-hour on test time series"
-        y_persistence = self.y_test.shift(1)
-        # y_persistence has a NaN at first position
-        mask = ~y_persistence.isna()
+        # persistence 1-hour ahead: P_{t+1}^pers = P_t
+        y_persistence = self.y_current_test
 
-        # metrics of persistence vs. ML model
         unit = '% Prated'
-        print("metrics of persistence model")
-        prediction_metrics(self.y_test[mask], y_persistence[mask], unit)
 
-        print("metrics of ML model")
+        print("metrics of persistence model (1-hour ahead)")
+        prediction_metrics(self.y_test, y_persistence, unit)
+
+        print("metrics of ML model (1-hour ahead)")
         prediction_metrics(self.y_test, y_predicted, unit)
 
-        # plot ML model predictions vs test data vs persistence
+        # plot ML vs test vs persistence
         model_name = self.model.__class__.__name__
         fig, ax = plt.subplots()
-        ax.plot(self.x_time_test, self.y_test, label="test data", marker='x')
-        ax.plot(self.x_time_test[mask],
-                y_persistence[mask], label="persistence model")
-        ax.plot(self.x_time_test, y_predicted, label="{model_name} model")
+        ax.plot(self.x_time_test, self.y_test,
+                label="true power (t+1)", marker='x')
+        ax.plot(self.x_time_test, y_persistence,
+                label="persistence (P_t)")
+        ax.plot(self.x_time_test, y_predicted,
+                label=f"{model_name} model")
+
         ax.legend()
         ax.set_ylabel("Power [% Prated]")
-        ax.set_title(f'testing of ML model {model_name}')
+        ax.set_title(f'testing of ML model {model_name} (1-hour ahead)')
         ax.grid(True)
         ax.tick_params(axis='x', rotation=45)
         plt.tight_layout()
         plt.show()
-        fig.savefig(f'outputs/testing of ML model {model_name}.png', format='png',
-                    dpi=200, bbox_inches='tight')
+
+        fig.savefig(f'outputs/testing of ML model {model_name}.png',
+                    format='png', dpi=200, bbox_inches='tight')
