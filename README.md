@@ -1,7 +1,7 @@
 # Project03_46W38  
 Wind power forecasting by machine learning  
-This project is released under the MIT License.
-Author: Stefano Dal Broi
+This project is released under the MIT License  
+Author: Stefano Dal Broi  
 
 ## Input data
 Dataset of **wind and power hourly data from 4 turbine sites**  
@@ -76,7 +76,7 @@ project03_46W38/
 │
 ├── inputs/
 │   └── Location1.csv, etc.       # site datasets
-├── outputs/                      # Generated plots (ignored except .gitkeep)
+├── outputs/                      # generated plots (ignored except .gitkeep)
 ├── src/
 │   └── project03/
 │       ├── __init__.py
@@ -98,22 +98,21 @@ src/project03/wind_forecast.py
 Main class with wind power forecasting workflow, including:  
  - load_data()       --> reads dataset of chosen site & converts timestamps & temperature units  
  - plot_timeseries() --> plots time series of variables in time window selected by User  
- - split()           --> splits into train/test subsets & applies scales inputs  
- - train_ml_model()  --> asks User for model & parameters & train it  
-                     --> Support Vector Regression (SVR), Multi-layer Perceptro (MLPRegressor) & Dense Neural Network (Keras)  
- - test_ml_model()   --> applies trained model to test data, then evaluate with metrics &    plotting predicted vs. persistence and test values  
+ - split() --> splits into train/test subsets & applies scales inputs  
+ - train_ml_model() --> asks User for model & parameters & train it (the featured models are SVR, MLPRegressor and Dense Neural Network Keras)  
+ - test_ml_model()--> applies trained model to test data, then evaluate with metrics &    plotting predicted vs. persistence and test values  
 
 ### KerasWrapper
-src/project03/keras_wrapper.py  
-This class makes possible to use Keras neural networks so that they behave like scikit-learn models with .fit(x, y) and .predict(x).  
-Thanks to this, the ML train and test methods in WindForecast are the same for all models.  
+**src/project03/keras_wrapper.py**  
+This class is created to allow for ML train and test methods in WindForecast to be the same for all models  
+It makes Keras neural networks behaving like scikit-learn models with .fit(x, y) and .predict(x)  
 
 ### Utility Functions
-src/project03/utilities.py
-    - ask_value(prompt, choices, default)   --> console-based site & model/parameter selection
-    - choose_from_list(list)                --> Tkinter GUI list of input dataset varaibles for plotting
-    - choose_time_window(start, end)        --> TkCalendar GUI for time window selection
-    - prediction_metrics(y_true, y_pred, unit)  --> computes MSE, RMSE, MAE
+**src/project03/utilities.py**  
+ - ask_value(prompt, choices, default) --> console-based site & model/parameter selection  
+ - choose_from_list(list) --> Tkinter GUI list of input dataset variables for plotting  
+ - choose_time_window(start, end) --> TkCalendar GUI for time window selection  
+ - prediction_metrics(y_true, y_pred, unit) --> computes MSE, RMSE, MAE  
 
 ---
 
