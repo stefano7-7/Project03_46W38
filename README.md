@@ -94,7 +94,8 @@ project03_46W38/
 
 ## Implemented Classes
 ### WindForecast 
-src/project03/wind_forecast.py  
+**src/project03/wind_forecast.py**  
+
 Main class with wind power forecasting workflow, including:  
  - load_data()       --> reads dataset of chosen site & converts timestamps & temperature units  
  - plot_timeseries() --> plots time series of variables in time window selected by User  
@@ -104,6 +105,7 @@ Main class with wind power forecasting workflow, including:
 
 ### KerasWrapper
 **src/project03/keras_wrapper.py**  
+
 This class is created to allow for ML train and test methods in WindForecast to be the same for all models  
 It makes Keras neural networks behaving like scikit-learn models with .fit(x, y) and .predict(x)  
 
