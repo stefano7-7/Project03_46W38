@@ -24,28 +24,28 @@ Source: openly available dataset with open “CC0 1.0 Universal” license
 
 ## Sequence Overview
 
-Steps:
+Steps:  
 1. **input data**
     - load data
     - preprocess_data 
     - plotting data  
 3. **machine learning module**
     - split in subsets — 80% train, 20% test (consecutive timestamps)
-    - train model 
+    - choose model & parameteres and train it 
     - test model (with metrics and plot)
 6. **evaluation metrics**
    - plots
    - numerical metrics 
-7. **save_model**
 
-Some inputs from User are required (both command line and other GUIs):
-    - site
-    - time window for plotting
-    - choice of ML model
-    - setting model parameters
+**User inputs**
+ Some inputs from User are required (both command line and other GUIs):
+ - site number
+ - time window for plotting (dates)
+ - choice of ML model
+ - setting model parameters
 ---
 
-## Flowchart (Mermaid)
+## Flowchart
 
 ```mermaid
 flowchart 
@@ -71,7 +71,7 @@ INPUT --> ML_BLOCK --> EVALUATION
 --- 
 
 ## Folder structure
-
+```
 project03_46W38/
 │
 ├── inputs/
@@ -89,24 +89,24 @@ project03_46W38/
 ├── pyproject.toml
 ├── README.md
 └── LICENSE
-
+```
 ---
 
 ## Implemented Classes
 ### WindForecast 
-src/project03/wind_forecast.py
-Main class with wind power forecasting workflow, including:
-    - load_data()       --> reads dataset of chosen site & converts timestamps & temperature units
-    - plot_timeseries() --> plots time series of variables in time window selected by User
-    - split()           --> splits into train/test subsets & applies scales inputs
-    - train_ml_model()  --> asks User for model & parameters & train it
-                        --> Support Vector Regression (SVR), Multi-layer Perceptro (MLPRegressor) & Dense Neural Network (Keras)
-    - test_ml_model()   --> applies trained model to test data, then evaluate with metrics &    plotting predicted vs. persistence and test values
+src/project03/wind_forecast.py  
+Main class with wind power forecasting workflow, including:  
+ - load_data()       --> reads dataset of chosen site & converts timestamps & temperature units  
+ - plot_timeseries() --> plots time series of variables in time window selected by User  
+ - split()           --> splits into train/test subsets & applies scales inputs  
+ - train_ml_model()  --> asks User for model & parameters & train it  
+                     --> Support Vector Regression (SVR), Multi-layer Perceptro (MLPRegressor) & Dense Neural Network (Keras)  
+ - test_ml_model()   --> applies trained model to test data, then evaluate with metrics &    plotting predicted vs. persistence and test values  
 
-# KerasWrapper
-src/project03/keras_wrapper.py
-This class makes possible to use Keras neural networks so that they behave like scikit-learn models with .fit(x, y) and .predict(x).
-Thanks to this, the ML train and test methods in WindForecast are the same for all models.
+### KerasWrapper
+src/project03/keras_wrapper.py  
+This class makes possible to use Keras neural networks so that they behave like scikit-learn models with .fit(x, y) and .predict(x).  
+Thanks to this, the ML train and test methods in WindForecast are the same for all models.  
 
 ### Utility Functions
 src/project03/utilities.py
@@ -114,6 +114,8 @@ src/project03/utilities.py
     - choose_from_list(list)                --> Tkinter GUI list of input dataset varaibles for plotting
     - choose_time_window(start, end)        --> TkCalendar GUI for time window selection
     - prediction_metrics(y_true, y_pred, unit)  --> computes MSE, RMSE, MAE
+
+---
 
 ## Installation Instructions
 Install the package locally inside the project root:
