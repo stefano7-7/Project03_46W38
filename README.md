@@ -119,7 +119,7 @@ It makes Keras neural networks behaving like scikit-learn models with .fit(x, y)
 ---
 
 ## Installation Instructions
-Install the package locally inside the project root:
-pip install -e .
-Run the example and follow the instructions:
-python examples/main.py
+Install the package locally inside the project root:  
+pip install -e .  
+Run the example and follow the instructions:  
+python examples/main.py  
