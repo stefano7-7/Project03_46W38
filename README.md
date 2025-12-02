@@ -86,6 +86,7 @@ project03_46W38/
 ├── examples/
 │   └── main.py                   # example script to run the package
 ├── tests/
+│   └── test_split.py
 ├── pyproject.toml
 ├── README.md
 └── LICENSE
@@ -99,7 +100,7 @@ project03_46W38/
 Main class with wind power forecasting workflow, including:  
  - load_data()       --> reads dataset of chosen site & converts timestamps & temperature units  
  - plot_timeseries() --> plots time series of variables in time window selected by User  
- - split() --> splits into train/test subsets & applies scales inputs  
+ - split() --> splits into train/test subsets & applies scaling to inputs  
  - train_ml_model() --> asks User for model & parameters & train it (the featured models are SVR, MLPRegressor and Dense Neural Network Keras)  
  - test_ml_model()--> applies trained model to test data, then evaluate with metrics &    plotting predicted vs. persistence and test values  
 
