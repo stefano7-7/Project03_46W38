@@ -28,6 +28,7 @@ class WindForecast():
     df : pandas dataframe for input dataset (timeseries)
     x_train, x_test : model inputs from dataset split
     x_time_test : timestamps of model test inputs from dataset split
+    x_scaler = scaled input
     y_train, y_test : model outputs from dataset split
     model : object, machine learning model
 
@@ -52,8 +53,10 @@ class WindForecast():
         self.x_train = None
         self.x_test = None
         self.x_time_test = None
-        self.y_train = None
-        self.y_test = None
+        self.y_shifted_train = None
+        self.y_shifted_test = None
+        self.y_original_test = None
+        self.x_scaler = None
 
     def load_data(self, chosen_site_number):
         """
@@ -114,40 +117,52 @@ class WindForecast():
 
     def split(self):
         """splitting the dataset 80-20 train-test"""
-        # can be upgraded adding x = df['temperature_2m']
+        # can be upgraded adding df['temperature_2m']
 
-        df = self.df.copy()
+        # working copy of the dataset
+        # for shifting, scaling and dropping NaN
+        df2 = self.df.copy()
 
         # time t+1h
-        df['Power_future'] = df['Power'].shift(-1)
-        df['Time_future'] = df['Time'].shift(-1)
-        df = df.dropna(subset=['Power_future', 'Time_future'])
+        df2['Power_future'] = df2['Power'].shift(-1)
+        df2['Time_future'] = df2['Time'].shift(-1)
+        df2 = df2.dropna(subset=['Power_future', 'Time_future'])
 
-        # time t
-        x = df[['windspeed_100m']]
-        x_time = df['Time_future']
-        y = df['Power_future']
+        # I will train the model on the relation between
+        # x-variable windspeed_100m at time t and
+        # power in the future at time t+1h
+        # now on the same line in the df2
+        x = df2[['windspeed_100m']]
+        y = df2['Power_future']
 
-        # scaler per X
+        # to plot the predictions
+        x_time = df2['Time_future']  # for the plotting
+
+        # splitting 80/20 train/test
+        split_index = int(0.8 * len(df2))
+        x_train_raw = x.iloc[:split_index]
+        x_test_raw = x.iloc[split_index:]
+
+        # scaling of x
+        # the same fit of train data is applied to test data
+        # x_scaled = (x_raw + mean)/std_dev
         self.x_scaler = StandardScaler()
-        x_scaled = self.x_scaler.fit_transform(x)
+        self.x_train = self.x_scaler.fit_transform(x_train_raw)
+        self.x_test = self.x_scaler.transform(x_test_raw)
 
-        split_index = int(0.8 * len(self.df))
-
-        # x dataset has to be a 2D dataframe for ML models
-        self.x_train = x_scaled[:split_index]
-        self.x_test = x_scaled[split_index:]
+        # time axis for plotting
         self.x_time_test = x_time.iloc[split_index:]
 
-        self.y_train = y.iloc[:split_index]
-        self.y_test = y.iloc[split_index:]  # actual power at t+1h
-        self.y_current_test = df['Power'].iloc[split_index:]
+        # y - power
+        self.y_shifted_train = y.iloc[:split_index]  # P(t+1) train
+        self.y_shifted_test = y.iloc[split_index:]  # P(t+1) test
+        self.y_original_test = df2['Power'].iloc[split_index:]  # P(t) test
 
         # check extremes of train & test datasets
         print("TRAIN Power_future min/max:",
-              self.y_train.min(), self.y_train.max())
+              self.y_shifted_train.min(), self.y_shifted_train.max())
         print("TEST  Power_future min/max:",
-              self.y_test.min(), self.y_test.max())
+              self.y_shifted_test.min(), self.y_shifted_test.max())
 
         return self
 
@@ -162,12 +177,21 @@ class WindForecast():
         model_name = ask_value("Choose ML model to train",
                                ['SVR', 'NN', 'NN_Keras'], 'NN')
         if model_name == 'SVR':
+            # C: higher values fit data more closely
+            #    but increase the risk of overfitting
+            # epsilon: error smaller than epsilon are ignored
+            # kernel RBF maps input into a non-linear feature space
             c = int(ask_value('Choose C', ['1', '10'], '10'))
             epsilon = float(ask_value('Choose epsilon (allowed deviations)',
                                       ['0.01', '0.1'], '0.01'))
             self.model = SVR(kernel='rbf', C=c, epsilon=epsilon)
 
         if model_name == 'NN':
+            # hidden_layer_sizes: nb neurons hidden layer
+            #                     more increase comput. time & overfitting risk
+            # activation=ReLU: for non-linearity
+            # max_iter: max nb number of epochs (training iterations)
+            #           higher helps convergence but increase compuy. time
             hidden_layer_sizes = int(ask_value('Choose nb neurons per layer',
                                                ['100', '500'], '100'))
             max_iter = int(
@@ -180,6 +204,17 @@ class WindForecast():
             epochs = int(ask_value('Choose epochs', ['50', '200'], '50'))
 
             def build_model():
+                # first Dense(64, activation='relu')
+                #               64 neurons with ReLU to learn
+                # non-linear combinations of the input features
+                # second Dense(64, activation='relu'):
+                #               second hidden layer
+                # third Dense(1, activation='sigmoid')
+                #               output layer sigmoid
+                #               forces predicted power
+                #               into the [0, 1] range
+                # optimizer='adam' adaptive gradient method
+                # loss=MSE penalizes more large prediction errors
                 model = Sequential([
                     Input(shape=(self.x_train.shape[1],)),
                     Dense(64, activation='relu'),
@@ -192,7 +227,7 @@ class WindForecast():
             self.model = KerasWrapper(build_model, epochs=epochs, batch_size=3)
 
         # method returning trained model
-        self.model.fit(self.x_train, self.y_train)
+        self.model.fit(self.x_train, self.y_shifted_train)
         return self
 
     def test_ml_model(self):
@@ -202,27 +237,26 @@ class WindForecast():
         plots predicted against true data & against persistence model
         takes into account first NaN with persistence
         """
-
-        # apply ML model to test dataset
-        # x_test_scaled = self.x_scaler.transform(self.x_test)
+        # apply ML model to scaled test dataset
         x_test_scaled = self.x_test
+
+        # 1-hour ahead prediction with trained model of choice
         y_predicted = self.model.predict(x_test_scaled)
 
         # persistence 1-hour ahead: P_{t+1}^pers = P_t
-        y_persistence = self.y_current_test
+        y_persistence = self.y_original_test
 
         unit = '% Prated'
-
         print("metrics of persistence model (1-hour ahead)")
-        prediction_metrics(self.y_test, y_persistence, unit)
+        prediction_metrics(self.y_shifted_test, y_persistence, unit)
 
         print("metrics of ML model (1-hour ahead)")
-        prediction_metrics(self.y_test, y_predicted, unit)
+        prediction_metrics(self.y_shifted_test, y_predicted, unit)
 
         # plot ML vs test vs persistence
         model_name = self.model.__class__.__name__
         fig, ax = plt.subplots()
-        ax.plot(self.x_time_test, self.y_test,
+        ax.plot(self.x_time_test, self.y_shifted_test,
                 label="true power (t+1)", marker='x')
         ax.plot(self.x_time_test, y_persistence,
                 label="persistence (P_t)")
